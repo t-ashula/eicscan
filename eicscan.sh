@@ -9,6 +9,14 @@ do_scan=0;
 function scan_swf(){
     url=$1
     echo "scan $url";
+    if [ $url == *.swf ];then
+        echo 'swf specified';
+        files=$url;
+    else
+        echo 'get file with phantomjs';
+        files=$(phantomjs getswflist.js $url 2> /dev/null);
+    fi 
+    echo $files
 }
 
 function show_help(){

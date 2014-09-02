@@ -27,15 +27,34 @@ page.onError = function(msg, trace) {
 page.open(url, function (status) {
     if (status !== 'success') {
         console.log('Unable to access network');
+        phantom.exit();
     } else {
-        var files = page.evaluate(function () {
-            var  _map = Array.prototype.map;
-            var embs = _map.call( document.querySelectorAll("embed[type='application/x-shockwave-flash']"), function(e){ return e.src; } ),
-                objs = _map.call( document.querySelectorAll("object[type='application/x-shockwave-flash']"), function(o){ return o.data; });
-            return embs.concat(objs);
-        });
-        console.log(files);
+        setTimeout(function(){
+            var files = page.evaluate(function () {
+                var _map = Array.prototype.map;
+                var embs = document.querySelectorAll('embed[type="application/x-shockwave-flash"]'), 
+                    objs1 = document.querySelectorAll('object[type="application/x-shockwave-flash"]'),
+                    objs2 = document.querySelectorAll('object[classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"]'),
+                    params = document.querySelectorAll('param[name="movie"]');
+                var files = [].concat(_map.call(embs, function(e){ return e.src; }))
+                        .concat(_map.call(objs1,  function(o){ return o.data; }))
+                        .concat(_map.call(objs2,  function(o){ return o.data; }))
+                        .concat(_map.call(params, function(p){ return p.value; }))
+                        .filter(function(u){return u !== ''; })
+                        .map(function(u){ 
+                            try{
+                                var a = document.createElement('a'); 
+                                a.href = u;
+                                return a.href;
+                            }catch(e){
+                                return u;
+                            }
+                        });
+                return files;
+            });
+            console.log(files);
+            phantom.exit();
+        }, 1000);
     }
-    phantom.exit();
 });
 
