@@ -8,6 +8,7 @@ var system = require('system'),
   page = require('webpage').create();
 var url = system.args[1];
 
+// https://github.com/ariya/phantomjs/issues/10150#issuecomment-28707859
 console.error = function () {
   system.stderr.write(Array.prototype.join.call(arguments, ' ') + '\n');
 };
@@ -18,7 +19,7 @@ page.onError = function (msg, trace) {
   if (trace && trace.length) {
     msgStack.push('TRACE:');
     trace.forEach(function (t) {
-      msgStack.push(' -> ' + t.file + ': ' + t.line + (t.function ? ' (in function "' + t.function+'")' : ''));
+      msgStack.push(' -> ' + t.file + ': ' + t.line + (t.function ? ' (in function "' + t.function + '")' : ''));
     });
   }
   console.error(msgStack.join('\n'));
@@ -50,16 +51,12 @@ page.open(url, function (status) {
       var files = page.evaluate(function () {
         var _map = Array.prototype.map;
         var embs = document.querySelectorAll('embed[type="application/x-shockwave-flash"]'),
-          objs1 = document.querySelectorAll('object[type="application/x-shockwave-flash"]'),
-          objs2 = document.querySelectorAll('object[classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"]'),
+            objs = document.querySelectorAll('object[type="application/x-shockwave-flash"], object[classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"]'),
           params = document.querySelectorAll('param[name="movie"]');
         var files = [].concat(_map.call(embs, function (e) {
             return e.src;
           }))
-          .concat(_map.call(objs1, function (o) {
-            return o.data;
-          }))
-          .concat(_map.call(objs2, function (o) {
+          .concat(_map.call(objs, function (o) {
             return o.data;
           }))
           .concat(_map.call(params, function (p) {
@@ -78,9 +75,9 @@ page.open(url, function (status) {
               return u;
             }
           });
-          return files;
+        return files;
       });
-      console.log(files);
+      console.log(files.join('\n'));
       phantom.exit();
     }, 1000);
   }
