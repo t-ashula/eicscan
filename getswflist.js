@@ -49,14 +49,18 @@ page.open(url, function (status) {
   else {
     setTimeout(function () {
       var files = page.evaluate(function () {
-        var _map = Array.prototype.map;
-        var embs = document.querySelectorAll('embed[type="application/x-shockwave-flash"]'),
-            objs = document.querySelectorAll('object[type="application/x-shockwave-flash"], object[classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000"]'),
-          params = document.querySelectorAll('param[name="movie"]');
+        var _map = Array.prototype.map, _filter = Array.prototype.filter, _qsa = function(s){ return document.querySelectorAll(s); };
+        var embs = _filter.call(_qsa('embed[type]'), function(e){ return e.getAttribute('type').match(/application\/x-shockwave-flash/i); }),
+            objs = _filter.call(_qsa('object[type]'),function(e){ return e.getAttribute('type').match(/application\/x-shockwave-flash/i); }),
+            objs2 = _filter.call(_qsa('object[classid]'), function(e){ return e.getAttribute('classid').match(/clsid:d27cdb6e-ae6d-11cf-96b8-444553540000/i); }),
+            params = _filter.call(_qsa('param[name]'), function(e){ return e.getAttribute('name').match(/movie/i); });
         var files = [].concat(_map.call(embs, function (e) {
             return e.src;
           }))
           .concat(_map.call(objs, function (o) {
+            return o.data;
+          }))
+          .concat(_map.call(objs2, function (o) {
             return o.data;
           }))
           .concat(_map.call(params, function (p) {
@@ -75,8 +79,8 @@ page.open(url, function (status) {
               return u;
             }
           });
-        return files;
-      });
+          return files;
+      }) || [];
       console.log(files.join('\n'));
       phantom.exit();
     }, 1000);
