@@ -14,7 +14,7 @@ function analyze_swf() {
     ua='Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2143.0 Safari/537.36';
     wget --no-check-certificate --user-agent "'$ua'" $swf -O $localfile 
     if [ -e $localfile ]; then
-        java -Djava.net.preferIPv4Stack=true -Xmx1024m -jar ./bin/ffdec.jar -export script ${workdir} $localfile
+        java -Djava.net.preferIPv4Stack=true -Xmx1024m -jar ./bin/ffdec.jar -export script $workdir $localfile
         grep -n -r "ExternalInterface.call" $workdir;
     else
         echo "failed.";
@@ -25,7 +25,7 @@ function analyze_swf() {
 function scan_swfs(){
     url=$1
     echo "scan $url";
-    if [ $url == *.swf ];then
+    if [[ $url == *.swf ]];then
         echo 'swf specified';
         files="$url";
     else
