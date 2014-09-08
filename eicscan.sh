@@ -16,6 +16,7 @@ function analyze_swf() {
     if [ -e $localfile ]; then
         java -Djava.net.preferIPv4Stack=true -Xmx1024m -jar ./bin/ffdec.jar -export script $workdir $localfile
         grep -n -r "ExternalInterface.call" $workdir;
+        grep -n -r "LoaderInfo" $workdir;
     else
         echo "failed.";
         return
